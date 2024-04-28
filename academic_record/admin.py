@@ -69,7 +69,7 @@ class ScheduleAdmin(admin.ModelAdmin):
         # This method is called when the admin page for adding a new Schedule is requested
         # We include the subject field in the form to ensure its value is available in the form data
         self.fields = ('academic_year', 'subject', 'teacher', 'section',
-                       'day', 'time_start', 'time_end')
+                       'day','is_view_grade', 'time_start', 'time_end')
         return super().add_view(request, *args, **kwargs)
 
 
