@@ -36,6 +36,7 @@ class ScheduleAdmin(admin.ModelAdmin):
         'section': lambda: Section.objects.all(),
         'academic_year': lambda: AcademicYear.objects.all(),
     }
+    autocomplete_fields = ['subject', 'teacher', 'section', 'academic_year']
     edit_fields = (
         ('Schedule Information', {
             'fields': [
@@ -69,7 +70,7 @@ class ScheduleAdmin(admin.ModelAdmin):
         # This method is called when the admin page for adding a new Schedule is requested
         # We include the subject field in the form to ensure its value is available in the form data
         self.fields = ('academic_year', 'subject', 'teacher', 'section',
-                       'day','is_view_grade', 'time_start', 'time_end')
+                       'day', 'time_start', 'time_end')
         return super().add_view(request, *args, **kwargs)
 
 
@@ -82,6 +83,7 @@ class AttendanceAdmin(admin.ModelAdmin):
         'student': lambda: Student.objects.all(),
         'schedule': lambda: Schedule.objects.all(),
     }
+    autocomplete_fields = ['student', 'schedule',]
     edit_fields = (
         ('Attendance', {
             'fields': [
@@ -98,11 +100,12 @@ class AttendanceAdmin(admin.ModelAdmin):
 
 class StudentAssessmentTabularInLine(admin.TabularInline):
     model = StudentAssessment
+    autocomplete_fields = ['student', ]
     fields = ('assessment', 'student', 'obtained_marks')
 
 
 @admin.register(Assessment)
-class AssessmentAdmin(BaseAdmin):
+class AssessmentAdmin(admin.ModelAdmin):
     list_fields = ('name', 'teacher', 'subject', 'academic_year')
     search_fields = ('name', 'subject__name',)
     ordering = ('name',)
@@ -112,21 +115,8 @@ class AssessmentAdmin(BaseAdmin):
         'academic_year': lambda: AcademicYear.objects.all(),
     }
     list_filter = ('assessment_type', 'subject', 'teacher')
+    autocomplete_fields = ['subject', 'teacher', 'academic_year']
     inlines = [StudentAssessmentTabularInLine,]
-    edit_fields = (
-        ('Assessment Information', {
-            'fields': [
-                'academic_year',
-                'subject',
-                'teacher',
-                'name',
-                'assessment_type',
-                'task_type',
-                'max_marks',
-                'grading_period'
-            ]
-        }),
-    )
 
 
 @admin.register(StudentAssessment)
@@ -135,14 +125,4 @@ class StudentAssessmentAdmin(admin.ModelAdmin):
                      'student__user__last_name', 'student__user__first_name',]
     list_display = ['assessment', 'student', 'obtained_marks']
     list_filter = ['assessment', 'student',]
-    formfield_querysets = {
-        'assessment': lambda: StudentAssessment.objects.all(),
-        'student': lambda: Student.objects.all()
-    }
-    edit_fields = (('Student Assessment', {
-        'fields': [
-            'assessment',
-            'student',
-            'obtained_marks',
-        ]
-    }),)
+    autocomplete_fields = ['student', 'assessment']
