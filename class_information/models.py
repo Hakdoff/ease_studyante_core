@@ -33,7 +33,7 @@ class GradeEncode(BaseModelWithUUID):
 
 class Department(models.Model):
     department_head = models.ForeignKey(
-        User, on_delete=models.SET_NULL, blank=False, null=True)
+        User, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=250, verbose_name="Department Name")
     code = models.CharField(max_length=50, verbose_name="Department Code")
 
@@ -52,7 +52,7 @@ class Section(BaseModelWithUUID):
 
 class Subject(BaseModelWithUUID):
     name = models.CharField(max_length=250, verbose_name="Subject Name")
-    code = models.CharField(max_length=10)
+    code = models.CharField(max_length=10, verbose_name="Subject Code")
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     year_level = models.CharField(
         max_length=10, choices=YEAR_LEVEL_CHOICES, default='GRADE 7')
