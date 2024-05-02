@@ -7,6 +7,8 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group, Permission
 from django.db.models import Q
 from django.template.loader import get_template
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
 
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
