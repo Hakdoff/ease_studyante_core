@@ -32,7 +32,7 @@ from dashboard.views import dashboard_detail_view, dashboard_view
 
 from ease_studyante_core import settings
 from ease_studyante_core.views import TokenViewWithUserId, TeacherAutocomplete
-from dal import autocomplete
+from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet
 
 
 schema_view = get_schema_view(
@@ -49,6 +49,7 @@ schema_view = get_schema_view(
 )
 
 router = DefaultRouter()
+router.register('devices', FCMDeviceAuthorizedViewSet)
 
 
 urlpatterns = [

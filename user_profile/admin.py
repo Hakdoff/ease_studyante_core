@@ -103,22 +103,22 @@ class AdminCreationForm(forms.ModelForm):
             )
             instance.user = user
         
-        context_email = {
-                "full_name": f"{user.first_name} {user.last_name}",
-                "password": password,
-                "email_address": user.email
-            }
+            context_email = {
+                    "full_name": f"{user.first_name} {user.last_name}",
+                    "password": password,
+                    "email_address": user.email
+                }
 
-        message = get_template(
-                'registration/index.html').render(context_email)
+            message = get_template(
+                    'registration/index.html').render(context_email)
 
-        context = {
-                'email_body': message,
-                'to_email': user.email,
-                'email_subject': 'Welcome to EaseStudyante'
-            }
+            context = {
+                    'email_body': message,
+                    'to_email': user.email,
+                    'email_subject': 'Welcome to EaseStudyante'
+                }
 
-        Util.send_email(context)
+            Util.send_email(context)
 
         if commit:
             instance.save()
@@ -148,7 +148,7 @@ class StudentCreationForm(forms.ModelForm):
         if email:
             try:
                 EmailValidator()(email)  # Ensures it's a valid email format
-            except ValidationError:
+            except forms.ValidationError:
                 self.add_error('email', 'Invalid email address')
 
         instance = getattr(self, 'instance', None)
@@ -277,7 +277,7 @@ class TeacherCreationForm(forms.ModelForm):
         if email:
             try:
                 EmailValidator()(email)  # Ensures it's a valid email format
-            except ValidationError:
+            except forms.ValidationError:
                 self.add_error('email', 'Invalid email address')
 
         instance = getattr(self, 'instance', None)
@@ -330,6 +330,23 @@ class TeacherCreationForm(forms.ModelForm):
                 last_name=self.cleaned_data['last_name'],
             )
             instance.user = user
+        
+            context_email = {
+                    "full_name": f"{user.first_name} {user.last_name}",
+                    "password": password,
+                    "email_address": user.email
+                }
+
+            message = get_template(
+                    'registration/index.html').render(context_email)
+
+            context = {
+                    'email_body': message,
+                    'to_email': user.email,
+                    'email_subject': 'Welcome to EaseStudyante'
+                }
+
+            Util.send_email(context)
 
         if commit:
             instance.save()
@@ -358,7 +375,7 @@ class ParentCreationForm(forms.ModelForm):
         if email:
             try:
                 EmailValidator()(email)  # Ensures it's a valid email format
-            except ValidationError:
+            except forms.ValidationError:
                 self.add_error('email', 'Invalid email address')
 
         instance = getattr(self, 'instance', None)
