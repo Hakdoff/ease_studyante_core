@@ -1,4 +1,5 @@
 from io import BytesIO
+import re
 from typing import Any
 from django import forms
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -7,14 +8,12 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group, Permission
 from django.db.models import Q
 from django.template.loader import get_template
-from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
 import qrcode
 
-# from aes.aes_implementation import encrypt
 from aes.aes_implementation import encrypt
 from base.admin import BaseAdmin, BaseStackedInline, User
 from academic_record.models import AcademicYear, Schedule
@@ -48,10 +47,14 @@ class AdminCreationForm(forms.ModelForm):
         email = cleaned_data.get('email')
         contact_number = cleaned_data.get('contact_number')
         
+        contact_number_pattern = r'^(09|\+639)\d{9}$'
+        if not re.match(contact_number_pattern, contact_number):
+            self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
+
         if email:
             try:
                 EmailValidator()(email)  # Ensures it's a valid email format
-            except ValidationError:
+            except forms.ValidationError:
                 self.add_error('email', 'Invalid email address')
 
         instance = getattr(self, 'instance', None)
@@ -70,13 +73,6 @@ class AdminCreationForm(forms.ModelForm):
 
             if Admin.objects.filter(contact_number=contact_number).exists():
                 self.add_error('contact_number', 'Contact number already exists.')
-
-            if not contact_number.isdigit() or len(contact_number) != 11:
-                raise forms.ValidationError(('Contact number must be 11 digits.'), code='invalid')
-
-            # Ensure contact number starts with '09'
-            if not contact_number.startswith('09'):
-                raise forms.ValidationError(('Contact number must start with "09".'), code='invalid')
 
         return cleaned_data
 
@@ -130,7 +126,7 @@ class AdminCreationForm(forms.ModelForm):
 
 class StudentCreationForm(forms.ModelForm):
     # Add fields for creating a new user
-    email = forms.CharField(label='Email', widget=forms.EmailInput)
+    email = forms.CharField(label='Email', widget=forms.EmailInput, validators=[EmailValidator(message='Invalid email address')])
     first_name = forms.CharField(
         label='Firstname', widget=forms.TextInput)
     last_name = forms.CharField(label='Lastname', widget=forms.TextInput)
@@ -144,6 +140,16 @@ class StudentCreationForm(forms.ModelForm):
         cleaned_data = super().clean()
         email = cleaned_data.get('email')
         contact_number = cleaned_data.get('contact_number')
+        
+        contact_number_pattern = r'^(09|\+639)\d{9}$'
+        if not re.match(contact_number_pattern, contact_number):
+            self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
+        
+        if email:
+            try:
+                EmailValidator()(email)  # Ensures it's a valid email format
+            except ValidationError:
+                self.add_error('email', 'Invalid email address')
 
         instance = getattr(self, 'instance', None)
 
@@ -249,7 +255,7 @@ class StudentCreationForm(forms.ModelForm):
 
 class TeacherCreationForm(forms.ModelForm):
     # Add fields for creating a new user
-    email = forms.CharField(label='Email', widget=forms.EmailInput)
+    email = forms.CharField(label='Email', widget=forms.EmailInput, validators=[EmailValidator(message='Invalid email address')])
     first_name = forms.CharField(
         label='Firstname', widget=forms.TextInput)
     last_name = forms.CharField(label='Lastname', widget=forms.TextInput)
@@ -263,6 +269,16 @@ class TeacherCreationForm(forms.ModelForm):
         cleaned_data = super().clean()
         email = cleaned_data.get('email')
         contact_number = cleaned_data.get('contact_number')
+        
+        contact_number_pattern = r'^(09|\+639)\d{9}$'
+        if not re.match(contact_number_pattern, contact_number):
+            self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
+        
+        if email:
+            try:
+                EmailValidator()(email)  # Ensures it's a valid email format
+            except ValidationError:
+                self.add_error('email', 'Invalid email address')
 
         instance = getattr(self, 'instance', None)
 
@@ -321,7 +337,7 @@ class TeacherCreationForm(forms.ModelForm):
 
 
 class ParentCreationForm(forms.ModelForm):
-    email = forms.CharField(label='Email', widget=forms.EmailInput)
+    email = forms.CharField(label='Email', widget=forms.EmailInput, validators=[EmailValidator(message='Invalid email address')])
     first_name = forms.CharField(label='First Name', widget=forms.TextInput)
     last_name = forms.CharField(label='Last Name', widget=forms.TextInput)
 
@@ -334,6 +350,16 @@ class ParentCreationForm(forms.ModelForm):
         cleaned_data = super().clean()
         email = cleaned_data.get('email')
         contact_number = cleaned_data.get('contact_number')
+        
+        contact_number_pattern = r'^(09|\+639)\d{9}$'
+        if not re.match(contact_number_pattern, contact_number):
+            self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
+        
+        if email:
+            try:
+                EmailValidator()(email)  # Ensures it's a valid email format
+            except ValidationError:
+                self.add_error('email', 'Invalid email address')
 
         instance = getattr(self, 'instance', None)
 
@@ -353,6 +379,9 @@ class ParentCreationForm(forms.ModelForm):
             if Parent.objects.filter(contact_number=contact_number).exists():
                 self.add_error('contact_number',
                                'contact number already exists')
+                
+            if not contact_number.isdigit() or len(contact_number) != 11:
+                raise forms.ValidationError(('Contact number must be 11 digits.'), code='invalid')
 
         return cleaned_data
 
