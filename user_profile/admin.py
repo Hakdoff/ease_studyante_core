@@ -396,9 +396,6 @@ class ParentCreationForm(forms.ModelForm):
             if Parent.objects.filter(contact_number=contact_number).exists():
                 self.add_error('contact_number',
                                'contact number already exists')
-                
-            if not contact_number.isdigit() or len(contact_number) != 11:
-                raise forms.ValidationError(('Contact number must be 11 digits.'), code='invalid')
 
         return cleaned_data
 
@@ -428,6 +425,23 @@ class ParentCreationForm(forms.ModelForm):
                 last_name=self.cleaned_data['last_name'],
             )
             instance.user = user
+            
+            context_email = {
+                    "full_name": f"{user.first_name} {user.last_name}",
+                    "password": password,
+                    "email_address": user.email
+                }
+
+            message = get_template(
+                    'registration/index.html').render(context_email)
+
+            context = {
+                    'email_body': message,
+                    'to_email': user.email,
+                    'email_subject': 'Welcome to EaseStudyante'
+                }
+
+            Util.send_email(context)
 
         if commit:
             instance.save()
