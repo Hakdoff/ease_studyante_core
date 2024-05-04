@@ -28,7 +28,7 @@ from drf_yasg.views import get_schema_view
 from django.contrib.auth.decorators import login_required
 
 from base.models import User
-from dashboard.views import dashboard_detail_view, dashboard_view
+from dashboard.views import dashboard_attendance, dashboard_detail_view, dashboard_view, dashboard_detail_attendances
 
 from ease_studyante_core import settings
 from ease_studyante_core.views import TokenViewWithUserId, TeacherAutocomplete
@@ -65,6 +65,8 @@ urlpatterns = [
          name='password_reset_complete'),
     path('', login_required(dashboard_view), name='dashboard'),
     path('dashboard/', login_required(dashboard_detail_view), name='dash_detail'),
+    path('dashboard/attendance', login_required(dashboard_attendance), name='dash_attendance'),
+    path('dashboard/attendance/details/<str:pk>', login_required(dashboard_detail_attendances), name='dash_detail'),
     path('teacher-autocomplete/', TeacherAutocomplete.as_view(model=User),
          name='teacher-autocomplete'),
 ]

@@ -1,0 +1,120 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{% static 'dashboard-styles.css' %}" />
+    <link rel="icon" type="image/x-icon" href="{% static 'images.png' %}" />
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <div class="split-columns">
+      <div class="side-panel">
+        <img class="img-logo" src="{% static 'images.png' %}" />
+        <p class="headings"><a href="/dashboard">EaseStudyante Dashboard</a></p>
+        <ul class="menu-list">
+          <li class="nav-link"><a href="{% url 'dashboard' %}">Home</a></li>
+          <li class="nav-link">
+            <a href="{% url 'dash_attendance'%}">View All Attendances</a>
+          </li>
+          <li class="nav-link">
+            <a href="{% url 'dash_detail' %}">View Students and Teachers</a>
+          </li>
+          <li class="nav-link">
+            <a href="{% url 'admin:index'%}">Go To Admin Dashboard</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- <div class="title-box">
+      <p class="title">Analytics Dashboard</p>
+      
+    </div> -->
+
+      <div class="main-div">
+        <div class="flex-container">
+          <!-- Display Attendance Data -->
+          <div class="user-div">
+            <a class="detail-link" href="{% url 'dash_detail' %}"
+              ><p class="heading">Students: {{ students_users.count }}</p></a
+            >
+          </div>
+
+          <div class="user-div">
+            <a class="detail-link" href="{% url 'dash_detail' %}"
+              ><p class="heading">Teachers: {{ teachers_users.count }}</p></a
+            >
+          </div>
+
+          <div class="user-div">
+            <p class="heading">Total Users in System: {{ user_count.count }}</p>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <p class="title-attendance">Attendance</p>
+          <form method="GET">
+            <div class="date-picker-container">
+              <label for="date-filter" class="date-label">Select Date:</label>
+              <div class="input-button-div">
+                <input type="date" id="date-filter" class="date-input-label" name="date">
+                <button type="submit" class="date-submit">Filter</button>
+              </div>
+            </div>
+          </form>
+          <ul class="lists">
+            {% for student_data in students_with_attendance %}
+            <li>
+              <button class="accordion">
+                {{ student_data.student.user.first_name }} {{ student_data.student.user.last_name }} - Attendance: {{ student_data.latest_attendance_date}}
+              </button>
+              <div class="panel">
+                <a href="{% url 'dash_detail' student_data.student.pk %}">View All {{ student_data.student.user.first_name }}'s Attendances</a>
+                <br />
+                - Time In: {{ student_data.student_time_in }} <br />
+                - Time Out: {{ student_data.student_time_out }} <br />
+                - Status: {% if student_data.is_present %}Present{% else %}Absent{% endif %}<br />
+                - Schedule: {{ student_data.schedule }}
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+
+          <script>
+            document.addEventListener("DOMContentLoaded", function () {
+              const accordions = document.querySelectorAll(".accordion");
+
+              accordions.forEach((accordion) => {
+                accordion.addEventListener("click", function () {
+                  const isActive = this.classList.contains("active");
+
+                  // Close all accordions first
+                  closeAllAccordions();
+
+                  // Toggle active class and panel display
+                  if (!isActive) {
+                    this.classList.add("active");
+                    const panel = this.nextElementSibling;
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                  }
+                });
+              });
+
+              function closeAllAccordions() {
+                const accordions = document.querySelectorAll(".accordion");
+                accordions.forEach((accordion) => {
+                  accordion.classList.remove("active");
+                  const panel = accordion.nextElementSibling;
+                  panel.style.maxHeight = null;
+                });
+              }
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
