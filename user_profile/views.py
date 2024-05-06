@@ -145,9 +145,12 @@ class ParentProfileView(generics.RetrieveAPIView):
                 "is_new_user": user_profile.user.is_new_user,
             }
 
-            students_serializer = StudentOnlySerializer(
-                user_profile.students, many=True)
-            data["students"] = students_serializer.data
+            students = Student.objects.filter(parent=user_profile)
+
+            if students.exists():
+                students_serializer = StudentOnlySerializer(
+                   students, many=True)
+                data["students"] = students_serializer.data
 
             return response.Response(data, status=status.HTTP_200_OK)
 

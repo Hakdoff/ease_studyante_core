@@ -3,7 +3,7 @@ from rest_framework import generics, permissions, response, status, exceptions
 
 from academic_record.gpa_caluclate import gpa_calculate
 from core.paginate import ExtraSmallResultsSetPagination
-from user_profile.models import Parent
+from user_profile.models import Parent, Student
 from .serializers import (StudentScheduleSerialzers,
                           AttendanceSerializers, StudentAssessmentSerializers, TeacherChatSerialzers)
 from .models import Schedule, AcademicYear, Attendance, StudentAssessment
@@ -275,7 +275,7 @@ class StudentChatTeacherListView(generics.ListAPIView):
                 return Schedule.objects.filter(academic_year=current_academic, section__pk=register_user.section.pk).order_by('time_start')
             else:
                 # will try parents conversation
-                students = Parent.objects.filter(user=user).values('students')
+                students = Student.objects.filter(parent__user=user)
                 register_users = Registration.objects.filter(
                     academic_year=current_academic, student__in=students).values('section')
                 return Schedule.objects.filter(academic_year=current_academic, section__in=register_users).distinct().order_by('time_start')
