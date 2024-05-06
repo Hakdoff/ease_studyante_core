@@ -70,8 +70,8 @@ class ChatSessionListCreateView(generics.ListCreateAPIView):
         is_person = self.request.GET.get('is_person', None)
         
         if is_person:
-            return ChatSession.objects.filter(person=self.request.user).distinct("teacher")
-        return ChatSession.objects.filter(teacher=self.request.user).distinct("person")
+            return ChatSession.objects.filter(person=self.request.user).order_by('teacher').distinct("teacher")
+        return ChatSession.objects.filter(teacher=self.request.user).order_by('person').distinct("person")
 
     def post(self, request, *args, **kwargs):
         teacher_id = request.data.get('teacher_id', None)
