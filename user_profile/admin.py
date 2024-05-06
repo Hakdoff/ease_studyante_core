@@ -486,7 +486,7 @@ class AdminAdmin(admin.ModelAdmin):
         'user': lambda: User.objects.all(),
     }
     fieldsets = (
-        ('Student Information', {
+        ('Admin Information', {
             'fields': [
                 'email',
                 'first_name',
