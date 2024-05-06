@@ -33,9 +33,29 @@ class SubjectAdminForm(forms.ModelForm):
                 self.add_error('code', 'Subject Code already exists')
 
         return cleaned_data
+    
+class SectionAdviserHeadChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f'{obj.last_name} - {obj.first_name}'
+
+    def filter_queryset(self, value, queryset):
+        if value:
+            queryset = queryset.filter(Q(first_name__icontains=value) | Q(
+                last_name__icontains=value))
+        return queryset
 
 class SectionAdminForm(forms.ModelForm):
-
+    adviser = SectionAdviserHeadChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url='teacher-autocomplete',
+            attrs={
+                'data-placeholder': 'Search for a teacher...',
+                'data-minimum-input-length': 2,
+            }
+        ),
+        required=False
+    )
     class Meta:
         model = Section
         fields = '__all__'
@@ -45,13 +65,18 @@ class SectionAdminForm(forms.ModelForm):
         instance = getattr(self, 'instance', None)
         section_name = cleaned_data.get('name')
         year_level = cleaned_data.get('year_level')
+        adviser = cleaned_data.get('adviser')
         
         if instance and instance.pk:  # Check if instance exists and has a primary key
             if Section.objects.filter(name=section_name, year_level=year_level).exclude(pk=instance.pk).exists():
                 self.add_error('name', 'A section with this name already exists in this year level')
+            if Section.objects.filter(adviser=adviser).exclude(pk=instance.pk).exists():
+                self.add_error('adviser', 'Adviser already exists')
         else:
             if Section.objects.filter(name=section_name, year_level=year_level).exists():
                 self.add_error('name', 'A section with this name already exists in this year level')
+            if Section.objects.filter(adviser=adviser).exists():
+                self.add_error('adviser', 'Adviser already exists')
 
         return cleaned_data
 
@@ -170,7 +195,49 @@ class DepartmentAdminForm(forms.ModelForm):
                 self.add_error('department_head', 'Department Head already exists')
 
         return cleaned_data
+    
+class SubjectsTabularInline(admin.TabularInline):
+    verbose_name = "Subject"
+    verbose_name_plural = "Subjects"
+    model = Subject
+    fields = ('name', 'code', 'year_level', 'written_work', 'performance_task', 'quartery_assessment',)
 
+    def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
+        # Set to True to allow adding new subjects
+        return True  # Change this to True to allow additions
+
+    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
+        # Return False to prevent deletions
+        return False
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        departments = Department.objects.all()
+        qs = super().get_queryset(request)
+        if departments.exists():
+            return qs.filter(department__in=departments)
+
+        return qs
+
+# class SubjectTabularInline(admin.TabularInline):
+#     verbose_name = "Subject"
+#     verbose_name_plural = "Subjects"
+#     model = Schedule
+#     fields = ('subject', 'academic_year',)
+
+#     def has_add_permission(self, request, obj=None):
+#         return False
+
+#     def has_delete_permission(self, request, obj=None):
+#         return False
+
+#     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+#         academic_years = AcademicYear.objects.all()
+#         qs = super(SubjectTabularInline, self).get_queryset(request)
+#         if academic_years.exists():
+#             academic_year = academic_years.first()
+#             return qs.filter(academic_year=academic_year)
+
+#         return qs
 
 @admin.register(Department)
 class DepartmentAdminView(admin.ModelAdmin):
@@ -178,7 +245,7 @@ class DepartmentAdminView(admin.ModelAdmin):
     search_fields = ['code', 'department_head__user__first_name',
                      'department_head__user__last_name']
     list_filter = ('code',)
-    inlines = [TeachersTabularInline,]
+    inlines = [SubjectsTabularInline,]
     form = DepartmentAdminForm
 
     class Media:
@@ -234,14 +301,13 @@ class SubjectTabularInline(admin.TabularInline):
 
         return qs
 
-
 @admin.register(Section)
 class SectionAdminView(admin.ModelAdmin):
     list_display = ['name', 'year_level']
     search_fields = ['name', 'year_level']
     list_filter = ('name', 'year_level')
     form = SectionAdminForm
-    inlines = [RegistrationTabularInline, SubjectTabularInline,]
+    inlines = [RegistrationTabularInline,]
     edit_fields = (
         ('Section Information', {
             'fields': [
@@ -250,3 +316,10 @@ class SectionAdminView(admin.ModelAdmin):
             ]
         }),
     )
+    form = SectionAdminForm
+    class Media:
+        css = {
+            'all': ('https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css',)
+        }
+        js = (
+            'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js',)

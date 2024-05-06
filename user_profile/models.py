@@ -53,6 +53,7 @@ class Parent(BaseProfile):
 
 
 class Student(BaseProfile):
+    lrn = models.CharField(max_length=12, blank=True, null=True, verbose_name="LRN")
     YEAR_LEVEL_CHOICES = [
         ('GRADE 7', 'Grade 7'),
         ('GRADE 8', 'Grade 8'),

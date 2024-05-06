@@ -1,5 +1,8 @@
 from django import forms
 from django.contrib import admin
+
+from academic_record.models import AcademicYear
+from user_profile.models import Student
 from .models import Registration
 
 class RegistrationAdminForm(forms.ModelForm):
@@ -23,7 +26,7 @@ class RegistrationAdminForm(forms.ModelForm):
 class RegistrationAdminView(admin.ModelAdmin):
     search_fields = ['student__user__last_name',
                      'student__user__first_name', 'section__name']
-    list_display = ['student', 'contact_number', 'section', 'academic_year']
+    list_display = ['student', 'section', 'academic_year']
     list_filter = ['student', 'section',]
     form = RegistrationAdminForm
     autocomplete_fields = ['student', 'section', 'academic_year']

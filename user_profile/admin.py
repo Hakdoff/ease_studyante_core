@@ -8,7 +8,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User, Group, Permission
 from django.db.models import Q
 from django.template.loader import get_template
+from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.core.validators import MinLengthValidator
 
 from django.db.models.query import QuerySet
 from django.http import HttpRequest
@@ -47,8 +49,11 @@ class AdminCreationForm(forms.ModelForm):
         email = cleaned_data.get('email')
         contact_number = cleaned_data.get('contact_number')
         
+        if contact_number is not None and not isinstance(contact_number, str):
+            contact_number = str(contact_number)
+        
         contact_number_pattern = r'^(09|\+639)\d{9}$'
-        if not re.match(contact_number_pattern, contact_number):
+        if contact_number and not re.match(contact_number_pattern, contact_number):
             self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
 
         if email:
@@ -130,6 +135,11 @@ class StudentCreationForm(forms.ModelForm):
     first_name = forms.CharField(
         label='Firstname', widget=forms.TextInput)
     last_name = forms.CharField(label='Lastname', widget=forms.TextInput)
+    lrn = forms.CharField(
+        label='Learner Reference Number', 
+        widget=forms.NumberInput,
+        validators=[MinLengthValidator(12, message='LRN must be exactly 12 digits')]
+    )
 
     class Meta:
         model = Student
@@ -140,11 +150,24 @@ class StudentCreationForm(forms.ModelForm):
         cleaned_data = super().clean()
         email = cleaned_data.get('email')
         contact_number = cleaned_data.get('contact_number')
+        lrn = cleaned_data.get('lrn')
+        
+        if contact_number is not None and not isinstance(contact_number, str):
+            contact_number = str(contact_number)
         
         contact_number_pattern = r'^(09|\+639)\d{9}$'
-        if not re.match(contact_number_pattern, contact_number):
+        if contact_number and not re.match(contact_number_pattern, contact_number):
             self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
         
+        if lrn and len(lrn) != 12:
+            self.add_error('lrn', 'Learner Reference Number must be exactly 12 characters.')
+            
+        instance = getattr(self, 'instance', None)
+        if instance and instance.pk:
+            # Check if the LRN is used by other students (excluding the current instance)
+            if Student.objects.exclude(pk=instance.pk).filter(lrn=lrn).exists():
+                self.add_error('lrn', 'LRN already exists.')
+            
         if email:
             try:
                 EmailValidator()(email)  # Ensures it's a valid email format
@@ -270,10 +293,13 @@ class TeacherCreationForm(forms.ModelForm):
         email = cleaned_data.get('email')
         contact_number = cleaned_data.get('contact_number')
         
-        contact_number_pattern = r'^(09|\+639)\d{9}$'
-        if not re.match(contact_number_pattern, contact_number):
-            self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
+        if contact_number is not None and not isinstance(contact_number, str):
+            contact_number = str(contact_number)
         
+        contact_number_pattern = r'^(09|\+639)\d{9}$'
+        if contact_number and not re.match(contact_number_pattern, contact_number):
+            self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
+
         if email:
             try:
                 EmailValidator()(email)  # Ensures it's a valid email format
@@ -368,10 +394,13 @@ class ParentCreationForm(forms.ModelForm):
         email = cleaned_data.get('email')
         contact_number = cleaned_data.get('contact_number')
         
-        contact_number_pattern = r'^(09|\+639)\d{9}$'
-        if not re.match(contact_number_pattern, contact_number):
-            self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
+        if contact_number is not None and not isinstance(contact_number, str):
+            contact_number = str(contact_number)
         
+        contact_number_pattern = r'^(09|\+639)\d{9}$'
+        if contact_number and not re.match(contact_number_pattern, contact_number):
+            self.add_error('contact_number', 'Contact number must be 11 digits and start with "09" or "+639".')
+
         if email:
             try:
                 EmailValidator()(email)  # Ensures it's a valid email format
@@ -483,7 +512,7 @@ class AdminAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'year_level')
+    list_display = ('user','lrn', 'year_level')
     search_fields = ['user__first_name', 'user__last_name']
     list_filter = ['user__student', 'year_level',]
     form = StudentCreationForm
@@ -498,6 +527,7 @@ class StudentAdmin(admin.ModelAdmin):
                 'email',
                 'first_name',
                 'last_name',
+                'lrn',
                 'contact_number',
                 'address',
                 'age',

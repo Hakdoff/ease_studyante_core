@@ -42,6 +42,8 @@ class Department(models.Model):
 
 
 class Section(BaseModelWithUUID):
+    adviser = models.ForeignKey(
+        User, on_delete=models.SET_NULL, blank=True, null=True)
     name = models.CharField(max_length=250, verbose_name="Section Name")
     year_level = models.CharField(
         max_length=10, choices=YEAR_LEVEL_CHOICES, default='GRADE 7')
