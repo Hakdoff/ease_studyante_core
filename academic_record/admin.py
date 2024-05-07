@@ -5,7 +5,7 @@ from base.admin import BaseAdmin
 from class_information.models import Section, Subject
 from user_profile.models import Student, Teacher
 
-from .models import Assessment, Attendance, Schedule, StudentAssessment, AcademicYear
+from .models import DAYS_OF_THE_WEEK, Assessment, Attendance, Schedule, StudentAssessment, AcademicYear
 
 class AcademicYearForm(forms.ModelForm):
 
@@ -46,6 +46,7 @@ class AcademicYearView(admin.ModelAdmin):
     )
 
 class ScheduleAdminForm(forms.ModelForm):
+    day = forms.ChoiceField(choices=DAYS_OF_THE_WEEK)  
     class Meta:
         model = Schedule
         fields = '__all__'
@@ -57,13 +58,19 @@ class ScheduleAdminForm(forms.ModelForm):
         time_start = cleaned_data.get('time_start')
         time_end = cleaned_data.get('time_end')
 
+        # Ensure `time_end` is not less than `time_start`
+        if time_start and time_end:
+            if time_end < time_start:
+                self.add_error('time_end', 'End time cannot be earlier than start time.')
+                raise forms.ValidationError('End time must be after start time.')
+
+        # Check for schedule conflicts with other schedules
         if teacher and day and time_start and time_end:
-            # Check if there's any schedule that overlaps with the new one
             overlapping_schedules = Schedule.objects.filter(
                 teacher=teacher,
                 day=day,
-                time_start__lte=time_end,  # Starting during or before the new schedule ends
-                time_end__gte=time_start   # Ending during or after the new schedule starts
+                time_start__lte=time_end,
+                time_end__gte=time_start
             )
 
             # Exclude the current instance from the check if it exists
@@ -71,11 +78,8 @@ class ScheduleAdminForm(forms.ModelForm):
                 overlapping_schedules = overlapping_schedules.exclude(pk=self.instance.pk)
 
             if overlapping_schedules.exists():
-                self.add_error(
-                    'time_start', 
-                    'This teacher already has a conflicting schedule at this time and day.'
-                )
-                raise forms.ValidationError('Schedule conflict detected.')
+                self.add_error('time_start', 'Schedule conflict detected.')
+                raise forms.ValidationError('This teacher has a conflicting schedule at this time and day.')
 
         return cleaned_data
 
