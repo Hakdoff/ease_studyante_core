@@ -5,7 +5,15 @@ from base.models import BaseModelWithUUID
 from django.utils.timezone import now
 from datetime import date
 
-
+DAYS_OF_THE_WEEK = [
+    ('Monday', 'Monday'),
+    ('Tuesday', 'Tuesday'),
+    ('Wednesday', 'Wednesday'),
+    ('Thursday', 'Thursday'),
+    ('Friday', 'Friday'),
+    ('Saturday', 'Saturday'),
+    ('Sunday', 'Sunday'),
+]
 class AcademicYear(BaseModelWithUUID):
     name = models.CharField(max_length=100)
     start_date = models.DateField()
