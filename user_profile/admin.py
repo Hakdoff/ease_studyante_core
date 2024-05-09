@@ -201,6 +201,11 @@ class StudentCreationForm(forms.ModelForm):
                 self.add_error('contact_number', 'Contact already exists')
 
         return cleaned_data
+    
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
+        return password
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -210,6 +215,7 @@ class StudentCreationForm(forms.ModelForm):
 
         # Check if instance exists and has an id (indicating it's an existing object)
         if instance.pk and instance.user_id:
+            password = self.generate_random_password()
             user = User.objects.get(pk=instance.user.pk)
             user.first_name = self.cleaned_data['first_name']
             user.last_name = last_name
@@ -217,10 +223,7 @@ class StudentCreationForm(forms.ModelForm):
             user.email = email
 
         else:
-            last_4_digits = contact_number[-4:]
-            last_name += '_' * max(0, 4 - len(last_name))
-            password = (last_name[:4] + last_4_digits)
-            # Save the user and student objects
+            password = self.generate_random_password()
             user = User.objects.create_user(
                 username=email,
                 password=password,
@@ -333,6 +336,11 @@ class TeacherCreationForm(forms.ModelForm):
                 self.add_error('contact_number', 'Contact already exists')
 
         return cleaned_data
+    
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
+        return password
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -349,11 +357,7 @@ class TeacherCreationForm(forms.ModelForm):
             user.email = email
 
         else:
-            last_4_digits = contact_number[-4:]
-            last_name += '_' * max(0, 4 - len(last_name))
-            password = (last_name[:4] + last_4_digits)
-
-            # Save the user and student objects
+            password = self.generate_random_password()
             user = User.objects.create_user(
                 username=email,
                 password=password,
@@ -433,6 +437,11 @@ class ParentCreationForm(forms.ModelForm):
                                'contact number already exists')
 
         return cleaned_data
+    
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
+        return password
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -448,9 +457,7 @@ class ParentCreationForm(forms.ModelForm):
             user.email = email
 
         else:
-            last_4_digits = contact_number[-4:]
-            last_name += '_' * max(0, 4 - len(last_name))
-            password = (last_name[:4] + last_4_digits)
+            password = self.generate_random_password()
 
             user = User.objects.create_user(
                 username=email,
