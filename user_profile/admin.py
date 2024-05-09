@@ -1,5 +1,7 @@
 from io import BytesIO
 import re
+import secrets
+import string
 from typing import Any
 from django import forms
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -80,6 +82,11 @@ class AdminCreationForm(forms.ModelForm):
                 self.add_error('contact_number', 'Contact number already exists.')
 
         return cleaned_data
+    
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
+        return password
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -88,6 +95,7 @@ class AdminCreationForm(forms.ModelForm):
         contact_number = self.cleaned_data.get('contact_number', '')
 
         if instance.pk and instance.user_id:
+            password = self.generate_random_password()
             user = User.objects.get(pk=instance.user.pk)
             user.first_name = self.cleaned_data['first_name']
             user.last_name = last_name
@@ -95,9 +103,7 @@ class AdminCreationForm(forms.ModelForm):
             user.email = email
 
         else:
-            last_4_digits = contact_number[-4:]
-            last_name += '_' * max(0, 4 - len(last_name))
-            password = (last_name[:4] + last_4_digits)
+            password = self.generate_random_password()
 
             user = User.objects.create_user(
                 username=email,
@@ -486,7 +492,7 @@ class AdminAdmin(admin.ModelAdmin):
         'user': lambda: User.objects.all(),
     }
     fieldsets = (
-        ('Student Information', {
+        ('Admin Information', {
             'fields': [
                 'email',
                 'first_name',

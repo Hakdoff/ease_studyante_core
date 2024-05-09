@@ -19,12 +19,10 @@ class BaseProfile(BaseModelWithUUID):
 
     MALE = 'M'
     FEMALE = 'F'
-    NA = 'N/A'
 
     GENDER_CHOICES = [
         (MALE, 'Male'),
         (FEMALE, 'Female'),
-        (NA, 'N/A'),
     ]
 
     user = models.OneToOneField(
@@ -34,7 +32,7 @@ class BaseProfile(BaseModelWithUUID):
     contact_number = models.CharField(max_length=25)
     age = models.IntegerField(null=False, blank=False)
     gender = models.CharField(
-        max_length=10, choices=GENDER_CHOICES, default=NA)
+        max_length=10, choices=GENDER_CHOICES)
     profile_photo = models.ImageField(
         upload_to='images/profiles/', blank=True, null=True)
 
