@@ -84,7 +84,7 @@ class AdminCreationForm(forms.ModelForm):
         return cleaned_data
     
     def generate_random_password(self):
-        alphabet = string.ascii_letters + string.digits + string.punctuation
+        alphabet = string.ascii_letters + string.digits
         password = ''.join(secrets.choice(alphabet) for i in range(8))
         return password
 
@@ -95,7 +95,6 @@ class AdminCreationForm(forms.ModelForm):
         contact_number = self.cleaned_data.get('contact_number', '')
 
         if instance.pk and instance.user_id:
-            password = self.generate_random_password()
             user = User.objects.get(pk=instance.user.pk)
             user.first_name = self.cleaned_data['first_name']
             user.last_name = last_name
@@ -203,7 +202,7 @@ class StudentCreationForm(forms.ModelForm):
         return cleaned_data
     
     def generate_random_password(self):
-        alphabet = string.ascii_letters + string.digits + string.punctuation
+        alphabet = string.ascii_letters + string.digits
         password = ''.join(secrets.choice(alphabet) for i in range(8))
         return password
 
@@ -215,7 +214,6 @@ class StudentCreationForm(forms.ModelForm):
 
         # Check if instance exists and has an id (indicating it's an existing object)
         if instance.pk and instance.user_id:
-            password = self.generate_random_password()
             user = User.objects.get(pk=instance.user.pk)
             user.first_name = self.cleaned_data['first_name']
             user.last_name = last_name
@@ -338,7 +336,7 @@ class TeacherCreationForm(forms.ModelForm):
         return cleaned_data
     
     def generate_random_password(self):
-        alphabet = string.ascii_letters + string.digits + string.punctuation
+        alphabet = string.ascii_letters + string.digits
         password = ''.join(secrets.choice(alphabet) for i in range(8))
         return password
 
@@ -439,7 +437,7 @@ class ParentCreationForm(forms.ModelForm):
         return cleaned_data
     
     def generate_random_password(self):
-        alphabet = string.ascii_letters + string.digits + string.punctuation
+        alphabet = string.ascii_letters + string.digits
         password = ''.join(secrets.choice(alphabet) for i in range(8))
         return password
 
