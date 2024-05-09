@@ -48,6 +48,7 @@ class StudentSerializer(serializers.ModelSerializer):
             'contact_number',
             'age',
             'gender',
+            'lrn',
             'profile_photo',
             'year_level',
             'qr_code_photo',
