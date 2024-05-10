@@ -27,7 +27,7 @@ class RegistrationAdminView(admin.ModelAdmin):
     search_fields = ['student__user__last_name',
                      'student__user__first_name', 'section__name']
     list_display = ['student', 'section', 'academic_year']
-    list_filter = ['student', 'section',]
+    list_filter = ['student', 'section','academic_year']
     form = RegistrationAdminForm
     autocomplete_fields = ['student', 'section', 'academic_year']
 

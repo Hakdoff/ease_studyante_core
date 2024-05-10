@@ -33,12 +33,11 @@ class TeacherScheduleListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = []
 
-        academic_years = AcademicYear.objects.all()
+        current_academic_year = AcademicYear.get_current_academic_year()
 
-        if academic_years.exists():
+        if current_academic_year:
             user = self.request.user
-            current_academic = academic_years.first()
-            return Schedule.objects.filter(academic_year=current_academic, teacher__user__pk=user.pk)
+            return Schedule.objects.filter(academic_year=current_academic_year, teacher__user__pk=user.pk)
 
         return queryset
 
@@ -66,16 +65,16 @@ class AttendanceTeacherListView(generics.ListAPIView):
         ]
     )
     def get_queryset(self):
-        academic_years = AcademicYear.objects.all()
+        current_academic_year = AcademicYear.get_current_academic_year()
         student = self.request.GET.get('student_id', None)
         subject = self.request.GET.get('subject_id', None)
 
         attendance = []
         user = self.request.user
 
-        if academic_years.exists():
+        if current_academic_year:
             register_students = Registration.objects.filter(
-                student__user__pk=student, academic_year=academic_years.first())
+                student__user__pk=student, academic_year=current_academic_year)
             if register_students.exists():
                 if student and subject:
                     attendance = Attendance.objects.filter(
@@ -96,7 +95,7 @@ class AttendanceTeacherViewSet(viewsets.ViewSet):
     def create(self, request):
         # student will be aes 256
         student = request.data.get('student', None)
-        academic_years = AcademicYear.objects.all()
+        current_academic_year = AcademicYear.get_current_academic_year()
 
         aes_256_split = student.split('$')
 
@@ -111,9 +110,9 @@ class AttendanceTeacherViewSet(viewsets.ViewSet):
         student = bytes.decode(decrypted)
 
         if is_valid_uuid(student):
-            if academic_years.exists():
+            if current_academic_year:
                 register_students = Registration.objects.filter(
-                    student__pk=student, academic_year=academic_years.first())
+                    student__pk=student, academic_year=current_academic_year)
 
             if register_students.exists():
                 teacher = self.request.user
@@ -164,20 +163,19 @@ class TeacherStudentAssessmentListView(generics.ListAPIView):
     pagination_class = ExtraSmallResultsSetPagination
 
     def get_queryset(self):
-        academic_years = AcademicYear.objects.all()
+        current_academic_year = AcademicYear.get_current_academic_year()
         grading_period = self.request.GET.get('grading_period', None)
         student_id = self.request.GET.get('student_id', None)
 
-        if academic_years.exists() and grading_period and student_id:
+        if current_academic_year and grading_period and student_id:
             user = self.request.user
-            current_academic = academic_years.first()
             register_users = Registration.objects.filter(
-                academic_year=current_academic, student__user__pk=student_id)
+                academic_year=current_academic_year, student__user__pk=student_id)
 
             if register_users.exists():
                 # check the user wether is register to current academic or not
                 register_user = register_users.first()
-                return StudentAssessment.objects.filter(assessment__academic_year=current_academic, assessment__grading_period=grading_period, student=register_user.student,
+                return StudentAssessment.objects.filter(assessment__academic_year=current_academic_year, assessment__grading_period=grading_period, student=register_user.student,
                                                         assessment__teacher__user__pk=user.pk).order_by('created_at', 'assessment__grading_period')
 
         return []
@@ -288,15 +286,14 @@ class TeacherStudentOverAllGPAView(APIView):
     )
     def get(self, request, *args, **kwargs):
         user = self.request.user
-        academic_years = AcademicYear.objects.all()
+        current_academic_year = AcademicYear.get_current_academic_year()
         subject_id = request.query_params.get('subject_id', None)
         student_id = request.query_params.get('student_id', None)
 
-        if academic_years.exists() and subject_id and student_id:
+        if current_academic_year and subject_id and student_id:
             user = self.request.user
-            current_academic = academic_years.first()
             register_users = Registration.objects.filter(
-                academic_year=current_academic, student__user__pk=student_id)
+                academic_year=current_academic_year, student__user__pk=student_id)
 
             if register_users.exists():
                 register_user = register_users.first()
@@ -308,20 +305,20 @@ class TeacherStudentOverAllGPAView(APIView):
                 if subject_id:
                     subject = get_object_or_404(Subject, pk=subject_id)
                     schedule = Schedule.objects.get(
-                        academic_year=current_academic, subject=subject, section=register_user.section)
+                        academic_year=current_academic_year, subject=subject, section=register_user.section)
 
                     first_grading_assessments = StudentAssessment.objects.filter(
                         assessment__teacher__user__pk=user.pk,
-                        assessment__academic_year=current_academic, assessment__grading_period='FIRST_GRADING', student=register_user.student, assessment__subject__pk=subject_id).order_by('created_at', 'assessment__grading_period')
+                        assessment__academic_year=current_academic_year, assessment__grading_period='FIRST_GRADING', student=register_user.student, assessment__subject__pk=subject_id).order_by('created_at', 'assessment__grading_period')
                     second_grading_assessments = StudentAssessment.objects.filter(
                         assessment__teacher__user__pk=user.pk,
-                        assessment__academic_year=current_academic, assessment__grading_period='SECOND_GRADING', student=register_user.student, assessment__subject__pk=subject_id).order_by('created_at', 'assessment__grading_period')
+                        assessment__academic_year=current_academic_year, assessment__grading_period='SECOND_GRADING', student=register_user.student, assessment__subject__pk=subject_id).order_by('created_at', 'assessment__grading_period')
                     third_grading_assessments = StudentAssessment.objects.filter(
                         assessment__teacher__user__pk=user.pk,
-                        assessment__academic_year=current_academic, assessment__grading_period='THIRD_GRADING', student=register_user.student, assessment__subject__pk=subject_id).order_by('created_at', 'assessment__grading_period')
+                        assessment__academic_year=current_academic_year, assessment__grading_period='THIRD_GRADING', student=register_user.student, assessment__subject__pk=subject_id).order_by('created_at', 'assessment__grading_period')
                     fourth_grading_assessments = StudentAssessment.objects.filter(
                         assessment__teacher__user__pk=user.pk,
-                        assessment__academic_year=current_academic, assessment__grading_period='FOURTH_GRADING', student=register_user.student, assessment__subject__pk=subject_id).order_by('created_at', 'assessment__grading_period')
+                        assessment__academic_year=current_academic_year, assessment__grading_period='FOURTH_GRADING', student=register_user.student, assessment__subject__pk=subject_id).order_by('created_at', 'assessment__grading_period')
 
                     data = {
                         'first_grading': self.get_calculate_gap(first_grading_assessments),
@@ -358,15 +355,12 @@ class TeacherAssessmentListView(generics.ListAPIView):
     ordering_fileds = ['name',]
 
     def get_queryset(self):
-        academic_years = AcademicYear.objects.all()
-        if academic_years.exists():
+        current_academic_year = AcademicYear.get_current_academic_year()
+        if current_academic_year:
             user = self.request.user
             teacher = get_object_or_404(Teacher, user=user)
-
-            current_academic = academic_years.first()
-
             return self.queryset.filter(
-                academic_year=current_academic, teacher=teacher)
+                academic_year=current_academic_year, teacher=teacher)
         return []
 
 
@@ -381,8 +375,8 @@ class TeacherAssessmentStudentListView(generics.ListAPIView):
         section_id = self.request.GET.get('section_id', None)
         subject_id = self.request.GET.get('subject_id', None)
 
-        academic_years = AcademicYear.objects.all()
-        if academic_years.exists():
+        current_academic_year = AcademicYear.get_current_academic_year()
+        if current_academic_year:
             user = self.request.user
             teacher = get_object_or_404(Teacher, user=user)
             schedules = Schedule.objects.filter(
@@ -390,12 +384,11 @@ class TeacherAssessmentStudentListView(generics.ListAPIView):
 
             if schedules.exists():
                 schedule = schedules.first()
-                current_academic = academic_years.first()
                 students = Registration.objects.filter(
                     section=schedule.section).values('student')
 
                 return self.queryset.filter(
-                    assessment__academic_year=current_academic,  assessment__teacher=teacher, student__in=students)
+                    assessment__academic_year=current_academic_year,  assessment__teacher=teacher, student__in=students)
         return []
 
 
@@ -437,14 +430,13 @@ class TeacherAttendaceListCreateView(generics.ListCreateAPIView):
     pagination_class = ExtraSmallResultsSetPagination
 
     def get_queryset(self):
-        academic_years = AcademicYear.objects.all()
+        current_academic_year = AcademicYear.get_current_academic_year()
 
-        if academic_years.exists():
+        if current_academic_year:
             schedule_id = self.request.GET.get('schedule_id', None)
-            academic_year = academic_years.first()
             schedule = get_object_or_404(Schedule, pk=schedule_id)
 
-            return self.queryset.filter(section=schedule.section, academic_year=academic_year)
+            return self.queryset.filter(section=schedule.section, academic_year=current_academic_year)
 
         return []
 

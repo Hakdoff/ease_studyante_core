@@ -1,5 +1,7 @@
 from io import BytesIO
 import re
+import secrets
+import string
 from typing import Any
 from django import forms
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -16,6 +18,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest
 import qrcode
 
+from aes.aes_implementation import encrypt
 from aes.aes_implementation import encrypt
 from base.admin import BaseAdmin, BaseStackedInline, User
 from academic_record.models import AcademicYear, Schedule
@@ -80,6 +83,11 @@ class AdminCreationForm(forms.ModelForm):
                 self.add_error('contact_number', 'Contact number already exists.')
 
         return cleaned_data
+    
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
+        return password
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -95,9 +103,7 @@ class AdminCreationForm(forms.ModelForm):
             user.email = email
 
         else:
-            last_4_digits = contact_number[-4:]
-            last_name += '_' * max(0, 4 - len(last_name))
-            password = (last_name[:4] + last_4_digits)
+            password = self.generate_random_password()
 
             user = User.objects.create_user(
                 username=email,
@@ -195,6 +201,11 @@ class StudentCreationForm(forms.ModelForm):
                 self.add_error('contact_number', 'Contact already exists')
 
         return cleaned_data
+    
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
+        return password
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -211,10 +222,8 @@ class StudentCreationForm(forms.ModelForm):
             user.email = email
 
         else:
-            last_4_digits = contact_number[-4:]
-            last_name += '_' * max(0, 4 - len(last_name))
-            password = (last_name[:4] + last_4_digits)
-            # Save the user and student objects
+            password = self.generate_random_password()
+            
             user = User.objects.create_user(
                 username=email,
                 password=password,
@@ -327,6 +336,11 @@ class TeacherCreationForm(forms.ModelForm):
                 self.add_error('contact_number', 'Contact already exists')
 
         return cleaned_data
+    
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
+        return password
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -343,11 +357,8 @@ class TeacherCreationForm(forms.ModelForm):
             user.email = email
 
         else:
-            last_4_digits = contact_number[-4:]
-            last_name += '_' * max(0, 4 - len(last_name))
-            password = (last_name[:4] + last_4_digits)
-
-            # Save the user and student objects
+            password = self.generate_random_password()
+            
             user = User.objects.create_user(
                 username=email,
                 password=password,
@@ -427,6 +438,11 @@ class ParentCreationForm(forms.ModelForm):
                                'contact number already exists')
 
         return cleaned_data
+    
+    def generate_random_password(self):
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
+        return password
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -442,9 +458,7 @@ class ParentCreationForm(forms.ModelForm):
             user.email = email
 
         else:
-            last_4_digits = contact_number[-4:]
-            last_name += '_' * max(0, 4 - len(last_name))
-            password = (last_name[:4] + last_4_digits)
+            password = self.generate_random_password()
 
             user = User.objects.create_user(
                 username=email,

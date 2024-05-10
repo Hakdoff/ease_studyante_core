@@ -24,12 +24,12 @@ class StudentProfileView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         user = self.request.user
         user_profiles = Student.objects.filter(user=user)
-        academic_years = AcademicYear.objects.all()
+        current_academic_year = AcademicYear.get_current_academic_year()
 
-        if user_profiles.exists() and academic_years.exists():
+        if user_profiles.exists() and current_academic_year:
             user_profile = user_profiles.first()
             register_users = Registration.objects.filter(
-                student=user_profile, academic_year=academic_years.first())
+                student=user_profile, academic_year=current_academic_year)
 
             if register_users.exists():
                 data = {
@@ -50,11 +50,10 @@ class StudentProfileView(generics.RetrieveAPIView):
 
                 return response.Response(data, status=status.HTTP_200_OK)
 
-        else:
-            error = {
+        error = {
                 "error_message": "Student not found"
             }
-            return response.Response(error, status=status.HTTP_400_BAD_REQUEST)
+        return response.Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TeacherProfileView(generics.RetrieveAPIView):
@@ -67,35 +66,34 @@ class TeacherProfileView(generics.RetrieveAPIView):
 
         if user_profiles.exists():
             user_profile = user_profiles.first()
-            academic_years = AcademicYear.objects.all()
+            current_academic_year = AcademicYear.get_current_academic_year()
             grade_encodes = GradeEncode.objects.all()
 
             grading_periods = []
 
-            if academic_years.exists() and grade_encodes.exists():
-                academic_year = academic_years.first()
+            if current_academic_year and grade_encodes.exists():
                 for grade_encode in grade_encodes:
                     if grade_encode.grading_period == "FIRST_GRADING":
                         period = {
-                            "grading_deadline": academic_year.first_grading_dealine,
+                            "grading_deadline": current_academic_year.first_grading_dealine,
                             "is_override_encoding": grade_encode.is_enable,
                             "grading_period": grade_encode.grading_period
                         }
                     if grade_encode.grading_period == "SECOND_GRADING":
                         period = {
-                            "grading_deadline": academic_year.second_grading_dealine,
+                            "grading_deadline": current_academic_year.second_grading_dealine,
                             "is_override_encoding": grade_encode.is_enable,
                             "grading_period": grade_encode.grading_period
                         }
                     if grade_encode.grading_period == "THIRD_GRADING":
                         period = {
-                            "grading_deadline": academic_year.third_grading_dealine,
+                            "grading_deadline": current_academic_year.third_grading_dealine,
                             "is_override_encoding": grade_encode.is_enable,
                             "grading_period": grade_encode.grading_period
                         }
                     if grade_encode.grading_period == "FOURTH_GRADING":
                         period = {
-                            "grading_deadline": academic_year.fourth_grading_dealine,
+                            "grading_deadline": current_academic_year.fourth_grading_dealine,
                             "is_override_encoding": grade_encode.is_enable,
                             "grading_period": grade_encode.grading_period
                         }
@@ -116,11 +114,10 @@ class TeacherProfileView(generics.RetrieveAPIView):
 
             return response.Response(data, status=status.HTTP_200_OK)
 
-        else:
-            error = {
-                "error_message": "Teacher not found"
-            }
-            return response.Response(error, status=status.HTTP_400_BAD_REQUEST)
+        error = {
+            "error_message": "Teacher not found"
+        }
+        return response.Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ParentProfileView(generics.RetrieveAPIView):
@@ -154,11 +151,10 @@ class ParentProfileView(generics.RetrieveAPIView):
 
             return response.Response(data, status=status.HTTP_200_OK)
 
-        else:
-            error = {
-                "error_message": "Parent not "
-            }
-            return response.Response(error, status=status.HTTP_400_BAD_REQUEST)
+        error = {
+            "error_message": "Parent not "
+        }
+        return response.Response(error, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangePasswordView(generics.UpdateAPIView):

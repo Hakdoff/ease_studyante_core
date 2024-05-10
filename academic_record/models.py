@@ -4,8 +4,17 @@ from class_information.models import Subject, Section
 from base.models import BaseModelWithUUID
 from django.utils.timezone import now
 from datetime import date
+from django.utils import timezone
 
-
+DAYS_OF_THE_WEEK = [
+    ('Monday', 'Monday'),
+    ('Tuesday', 'Tuesday'),
+    ('Wednesday', 'Wednesday'),
+    ('Thursday', 'Thursday'),
+    ('Friday', 'Friday'),
+    ('Saturday', 'Saturday'),
+    ('Sunday', 'Sunday'),
+]
 class AcademicYear(BaseModelWithUUID):
     name = models.CharField(max_length=100)
     start_date = models.DateField()
@@ -15,12 +24,19 @@ class AcademicYear(BaseModelWithUUID):
     second_grading_dealine = models.DateField(null=True, blank=False)
     third_grading_dealine = models.DateField(null=True, blank=False)
     fourth_grading_dealine = models.DateField(null=True, blank=False)
+    is_active = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['created_at']
 
     def __str__(self):
         return self.name
+    
+    @classmethod
+    def get_current_academic_year(self):
+        current_datetime = now()
+        queryset = self.objects.filter(is_active=True, start_date__lte=current_datetime, end_date__gte=current_datetime)
+        return queryset.first() if queryset.exists() else None
 
 
 class Schedule(BaseModelWithUUID):

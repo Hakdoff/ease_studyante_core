@@ -14,17 +14,16 @@ class ParentStudentListView(generics.RetrieveAPIView):
     pagination_class = ExtraSmallResultsSetPagination
 
     def get_queryset(self):
-        academic_years = AcademicYear.objects.all()
+        current_academic_year = AcademicYear.get_current_academic_year()
 
-        if academic_years.exists():
+        if current_academic_year:
             user = self.request.user
-            current_academic = academic_years.first()
             register_users = Registration.objects.filter(
-                academic_year=current_academic, student__user__pk=user.pk)
+                academic_year=current_academic_year, student__user__pk=user.pk)
 
             if register_users.exists():
                 # check the user wether is register to current academic or not
                 register_user = register_users.first()
-                return Schedule.objects.filter(academic_year=current_academic, section__pk=register_user.section.pk).order_by('time_start')
+                return Schedule.objects.filter(academic_year=current_academic_year, section__pk=register_user.section.pk).order_by('time_start')
 
         return []

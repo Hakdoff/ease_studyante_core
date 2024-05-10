@@ -13,12 +13,12 @@ from django.db.models import Q
 
 
 def dashboard_view(request):
-    academic_years = AcademicYear.objects.all()
+    current_academic_year = AcademicYear.get_current_academic_year()
     context ={}
 
-    if academic_years.exists():
+    if current_academic_year:
 
-        students_users = Registration.objects.filter(academic_year=academic_years.first())
+        students_users = Registration.objects.filter(academic_year=current_academic_year)
         teachers_users = Schedule.objects.all()
         male_students = []
         female_students = []

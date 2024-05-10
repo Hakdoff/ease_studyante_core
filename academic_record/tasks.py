@@ -6,17 +6,16 @@ from .models import AcademicYear, Attendance, Schedule
 
 
 def perform_end_of_day_tasks():
-    academic_years = AcademicYear.objects.all()
+    current_academic_year = AcademicYear.get_current_academic_year()
     sections = Section.objects.all()
 
     # perform student absent
-    if academic_years.exists():
+    if current_academic_year:
         current_date = datetime.now()
-        recent_academic_year = academic_years.first()
         schedules = Schedule.objects.filter(
-            section__in=sections, academic_year=recent_academic_year)
+            section__in=sections, academic_year=current_academic_year)
         registered_students = Registration.objects.filter(
-            academic_year=recent_academic_year)
+            academic_year=current_academic_year)
         if schedules.exists():
             for registered_student in registered_students:
                 for schedule in schedules:
