@@ -42,6 +42,7 @@ class StudentProfileView(generics.RetrieveAPIView):
                     "address": user_profile.address,
                     "contactNumber": user_profile.contact_number,
                     "gender": user_profile.gender,
+                    "lrn": user_profile.lrn,
                     "age": user_profile.age,
                     "profilePhoto": request.build_absolute_uri(user_profile.profile_photo.url) if user_profile.profile_photo else None,
                     "is_new_user": user_profile.user.is_new_user,
