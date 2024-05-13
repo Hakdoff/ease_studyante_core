@@ -38,6 +38,11 @@ class AcademicYear(BaseModelWithUUID):
         queryset = self.objects.filter(is_active=True, start_date__lte=current_datetime, end_date__gte=current_datetime)
         return queryset.first() if queryset.exists() else None
 
+    @classmethod
+    def get_academic_years(self):
+        current_datetime = now()
+        return self.objects.filter(is_active=True, start_date__lte=current_datetime, end_date__gte=current_datetime)
+
 
 class Schedule(BaseModelWithUUID):
     academic_year = models.ForeignKey(

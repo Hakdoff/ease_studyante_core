@@ -170,14 +170,55 @@ class AssessmentAdmin(admin.ModelAdmin):
     list_fields = ('name', 'teacher', 'subject', 'academic_year')
     search_fields = ('name', 'subject__name',)
     ordering = ('name',)
-    formfield_querysets = {
-        'subject': lambda: Subject.objects.all(),
-        'teacher': lambda: Teacher.objects.all(),
-        'academic_year': lambda: AcademicYear.objects.all(),
-    }
     list_filter = ('assessment_type', 'subject', 'teacher__user__teacher')
-    autocomplete_fields = ['subject', 'teacher', 'academic_year']
+    autocomplete_fields = ['subject', 'teacher',]
     inlines = [StudentAssessmentTabularInLine,]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "academic_year":
+            kwargs["queryset"] = AcademicYear.get_academic_years()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:  # Check if the user is an admin
+            return qs  # Return the default queryset
+        else:
+            user = request.user
+            teachers = Teacher.objects.filter(user=user)
+            if teachers.exists():
+                teacher = teachers.first()
+                # Apply filtering based on your condition
+                return qs.filter(teacher=teacher)
+        return qs
+
+    def get_list_filter(self, request):
+        default_list_filter = ('assessment_type', 'subject', 'teacher__user__teacher')
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:  # Check if the user is an admin
+            return default_list_filter
+        else:
+            user = request.user
+            teachers = Teacher.objects.filter(user=user)
+            if teachers.exists():
+                return ('assessment_type', 'subject',)
+        return default_list_filter
+    
+    def save_model(self, request, obj, form, change):
+        if request.user.is_staff:
+            user = request.user
+            teachers = Teacher.objects.filter(user=user)
+            if teachers.exists():
+                teacher = teachers.first()
+                obj.teacher = teacher
+        obj.save()
+    
+    def get_exclude(self, request, obj=None):
+        excludes = super().get_exclude(request, obj=obj) or ()
+        if request.user.is_staff:
+            excludes += ('teacher',)
+        return excludes
 
 
 @admin.register(StudentAssessment)
@@ -187,3 +228,17 @@ class StudentAssessmentAdmin(admin.ModelAdmin):
     list_display = ['assessment', 'student', 'obtained_marks']
     list_filter = ['assessment', 'student',]
     autocomplete_fields = ['student', 'assessment']
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:  # Check if the user is an admin
+            return qs  # Return the default queryset
+        else:
+            user = request.user
+            teachers = Teacher.objects.filter(user=user)
+            if teachers.exists():
+                teacher = teachers.first()
+                # Apply filtering based on your condition
+                return qs.filter(assessment__teacher=teacher)
+        return qs
+
