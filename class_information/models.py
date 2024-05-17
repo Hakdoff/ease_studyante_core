@@ -74,7 +74,7 @@ class Subject(BaseModelWithUUID):
         total = written_work + performance_task + quartery_assessment
 
         if total != 100:
-            raise ValidationError("The sum of the fields must be 100.")
+            raise ValidationError("The sum of the subject components must be 100.")
 
     def save(self, *args, **kwargs):
         self.full_clean()  # Ensure the model is clean before saving

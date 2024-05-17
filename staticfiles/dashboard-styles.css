@@ -1,0 +1,340 @@
+/*
+  1. Use a more-intuitive box-sizing model.
+*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border: 0px solid red;
+}
+/*
+  2. Remove default margin
+*/
+* {
+  margin: 0;
+}
+/*
+  Typographic tweaks!
+  3. Add accessible line-height
+  4. Improve text rendering
+*/
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+/*
+  5. Improve media defaults
+*/
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+/*
+  6. Remove built-in form typography styles
+*/
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+/*
+  7. Avoid text overflows
+*/
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+/*
+  8. Create a root stacking context
+*/
+#root,
+#__next {
+  isolation: isolate;
+}
+/**************************************************************************/
+/*                            Layout Styles                               */
+/**************************************************************************/
+
+.split-columns {
+  display: flex;
+  flex-direction: row;
+  min-height: 100dvh;
+}
+
+.side-panel {
+  padding: 0px;
+  background-color: #d64646;
+}
+
+.side-panel .headings {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.5rem;
+  margin: 30px;
+  color: white;
+}
+
+.side-panel .headings a {
+  color: white;
+  text-decoration: none;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 0px;
+  margin: 0px;
+  color: white;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 70px;
+}
+
+.nav-link {
+  padding: 20px;
+  background-color: #c44343;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.nav-link a {
+  color: white;
+  text-decoration: none;
+}
+
+.side-panel .img-logo {
+  width: 10dvw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline: auto;
+  margin-top: 40px;
+}
+
+.main-div {
+  min-width: 85dvw;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-inline: auto;
+}
+
+.user-div {
+  width: 40%;
+  margin-inline: 20px;
+  padding: 10px;
+  background-color: #d64646;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: lighter;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 10px;
+}
+
+.chart-master-containers {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-inline: auto;
+}
+
+.chart-container {
+  min-width: 40dvw;
+  margin-inline: 10px;
+  padding: 20px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  margin-top: 20px;
+  border-radius: 8px;
+  height: 85dvh;
+}
+
+.heading {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.8rem;
+}
+
+.detail-link {
+  color: white;
+}
+
+.title-attendance,
+.lists {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.2rem;
+  color: black;
+  text-decoration: none;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.title-attendance {
+  color: #fff;
+  background-color: #d64646;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.lists {
+  overflow-y: scroll;
+  height: 54dvh;
+  margin-top: 20px;
+}
+
+.accordion {
+  background-color: #d64646;
+  color: #fff;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+.active .accordion:hover {
+  background-color: #ccc;
+}
+
+.panel {
+  background-color: white;
+  overflow: hidden;
+  margin-bottom: 10px;
+  max-height: 0;
+  transition: max-height 0.2s ease-out;
+}
+
+.margin-top {
+  margin-top: 5dvh;
+}
+
+.flex-container-data {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  min-height: 100dvh;
+}
+
+.list {
+  height: 80dvh;
+  width: 60dvh;
+  margin-inline: 20px;
+}
+
+.list-heading, .list-count {
+  padding: 10px;
+  background-color: #d64646;
+  color: white;
+}
+
+.list-heading,
+.list-count,
+.actual-list {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.actual-list {
+  list-style-type: none;
+  text-decoration: none;
+  padding: 0;
+  margin: 10px;
+  overflow-y: scroll;
+}
+
+.actual-list li {
+  margin: 10px;
+  padding: 5px;
+  background-color: #d64646;
+  color: white;
+}
+
+.date-label {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.9rem;
+}
+
+.date-input-label {
+  padding: 10px;
+  width: 20vw;
+  border-radius: 8px;
+  border: 1px solid black;
+}
+
+.date-picker-container {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+.date-input-label,
+.date-submit {
+  display: inline-block;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+}
+
+.input-button-div {
+  display: inline-block;
+}
+
+.date-submit {
+  margin: 10px;
+  padding: 10px 20px;
+  width: 10vw;
+  cursor: pointer;
+  border-radius: 8px;
+  background-color: #d64646;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.attendance-container {
+  display: flex;
+  flex-direction: row;
+  margin-inline: auto;
+}
+
+.container {
+  min-width: 40dvw;
+  margin-inline: auto;
+  padding: 20px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  margin-top: 20px;
+  border-radius: 8px;
+  height: 85dvh;
+}
+
+.attendance-detail-lists {
+  list-style: none;
+  text-decoration: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.0rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: scroll;
+  height: 70dvh;
+  margin-top: 10px
+}
+
+.attendance-detail-lists li {
+  margin: 10px;
+  padding: 10px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 8px;
+}

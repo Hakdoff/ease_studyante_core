@@ -19,7 +19,6 @@ class AcademicYear(BaseModelWithUUID):
     name = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()
-    remarks = models.CharField(max_length=100, blank=True)
     first_grading_dealine = models.DateField(null=True, blank=False)
     second_grading_dealine = models.DateField(null=True, blank=False)
     third_grading_dealine = models.DateField(null=True, blank=False)

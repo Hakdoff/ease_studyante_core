@@ -24,6 +24,9 @@ class SubjectAdminForm(forms.ModelForm):
         cleaned_data = super().clean()
         instance = getattr(self, 'instance', None)
         subjectcode = cleaned_data.get('code')
+        written_work = cleaned_data.get("written_work")
+        performance_task = cleaned_data.get("performance_task")
+        quartery_assessment = cleaned_data.get("quartery_assessment")
         
         if instance and instance.pk:  # Check if instance exists and has a primary key
             if Subject.objects.filter(code=subjectcode).exclude(pk=instance.pk).exists():
@@ -31,6 +34,24 @@ class SubjectAdminForm(forms.ModelForm):
         else:
             if Subject.objects.filter(code=subjectcode).exists():
                 self.add_error('code', 'Subject Code already exists')
+                
+        if written_work <= 1:
+            self.add_error('written_work', "Written work must be greater than 1.")
+        if performance_task <= 1:
+            self.add_error('performance_task', "Performance task must be greater than 1.")
+        if quartery_assessment <= 1:
+            self.add_error('quartery_assessment', "Quarterly assessment must be greater than 1.")
+
+        total = written_work + performance_task + quartery_assessment
+
+        if total != 100:
+            self.add_error('written_work', "The sum of the subject components must be 100.")
+        if total != 100:
+            self.add_error('performance_task',"The sum of the subject components must be 100.")
+        if total != 100:
+            self.add_error('quartery_assessment', "The sum of the subject components must be 100.")
+        
+
 
         return cleaned_data
     
@@ -116,17 +137,6 @@ class ScheduleTabularInline(admin.TabularInline):
             return qs.filter(academic_year=academic_year)
 
         return qs
-
-
-@admin.register(Subject)
-class SubjectAdminView(admin.ModelAdmin):
-    list_display = ['name', 'code', 'department', 'year_level']
-    search_fields = ['name', 'year_level', 'code',]
-    list_filter = ('name', 'year_level',)
-    form = SubjectAdminForm
-    inlines = [ScheduleTabularInline,]
-    autocomplete_fields = ['department',]
-
 
 class TeachersTabularInline(admin.TabularInline):
     verbose_name = "Teacher"
@@ -255,6 +265,15 @@ class DepartmentAdminView(admin.ModelAdmin):
         js = (
             'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js',)
 
+@admin.register(Subject)
+class SubjectAdminView(admin.ModelAdmin):
+    change_list_template = 'admin/class_information/subject/change_list.html'
+    list_display = ['name', 'code', 'department', 'year_level']
+    search_fields = ['name', 'year_level', 'code',]
+    list_filter = ('name', 'year_level',)
+    form = SubjectAdminForm
+    inlines = [ScheduleTabularInline,]
+    autocomplete_fields = ['department',]
 
 class RegistrationTabularInline(admin.TabularInline):
     verbose_name = "Student"

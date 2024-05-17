@@ -1,0 +1,45 @@
+{% extends "admin/change_list.html" %}
+
+{% load admin_urls %}
+
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn = document.getElementById('addMultipleSubjectLink');
+
+        btn.onclick = function (e) {
+            e.preventDefault();
+            Swal.fire({
+                text: "You are about to add multiple subjects.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Continue'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "{% url 'admin:class_information_department_changelist' %}";
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block object-tools %}
+<ul class="object-tools">
+    <li>
+        <a href="#" class="viewlistlink" id="addMultipleSubjectLink">
+            Add Multiple Subjects
+        </a>
+    </li>
+</ul>
+{% endblock %}
