@@ -138,6 +138,18 @@ class ScheduleTabularInline(admin.TabularInline):
 
         return qs
 
+
+@admin.register(Subject)
+class SubjectAdminView(admin.ModelAdmin):
+    # change_list_template = 'admin/class_information/subject/change_list.html'
+    list_display = ['name', 'code', 'department', 'year_level']
+    search_fields = ['name', 'year_level', 'code',]
+    list_filter = ('name', 'year_level',)
+    form = SubjectAdminForm
+    inlines = [ScheduleTabularInline,]
+    autocomplete_fields = ['department',]
+
+
 class TeachersTabularInline(admin.TabularInline):
     verbose_name = "Teacher"
     verbose_name_plural = "Teachers"
@@ -205,58 +217,67 @@ class DepartmentAdminForm(forms.ModelForm):
                 self.add_error('department_head', 'Department Head already exists')
 
         return cleaned_data
-    
+
+
+from django.contrib import admin
+from django.http import HttpRequest
+from django.forms.models import BaseInlineFormSet
+from django.db.models import QuerySet
+
+class ReadOnlyInlineFormSet(BaseInlineFormSet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.can_add = True  # Allow adding new objects
+
 class SubjectsTabularInline(admin.TabularInline):
     verbose_name = "Subject"
     verbose_name_plural = "Subjects"
     model = Subject
     fields = ('name', 'code', 'year_level', 'written_work', 'performance_task', 'quartery_assessment',)
+    show_change_link = True  # Corrected syntax for show_change_link
+    formset = ReadOnlyInlineFormSet
+    extra = 1
+    classes = ['collapse']
+
+    
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        if obj:
+            formset.can_add = True
+        return formset
 
     def has_add_permission(self, request: HttpRequest, obj=None) -> bool:
-        # Set to True to allow adding new subjects
-        return True  # Change this to True to allow additions
-
-    def has_delete_permission(self, request: HttpRequest, obj=None) -> bool:
-        # Return False to prevent deletions
-        return False
+        return True  # Allow adding new subjects
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
         departments = Department.objects.all()
         qs = super().get_queryset(request)
         if departments.exists():
             return qs.filter(department__in=departments)
-
         return qs
-
-# class SubjectTabularInline(admin.TabularInline):
-#     verbose_name = "Subject"
-#     verbose_name_plural = "Subjects"
-#     model = Schedule
-#     fields = ('subject', 'academic_year',)
-
-#     def has_add_permission(self, request, obj=None):
-#         return False
-
-#     def has_delete_permission(self, request, obj=None):
-#         return False
-
-#     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
-#         academic_years = AcademicYear.objects.all()
-#         qs = super(SubjectTabularInline, self).get_queryset(request)
-#         if academic_years.exists():
-#             academic_year = academic_years.first()
-#             return qs.filter(academic_year=academic_year)
-
-#         return qs
 
 @admin.register(Department)
 class DepartmentAdminView(admin.ModelAdmin):
     list_display = ['code', 'name', 'department_head']
-    search_fields = ['code', 'department_head__user__first_name',
-                     'department_head__user__last_name']
+    search_fields = ['code', 'department_head__user__first_name', 'department_head__user__last_name']
     list_filter = ('code',)
     inlines = [SubjectsTabularInline,]
     form = DepartmentAdminForm
+
+    def get_formsets_with_inlines(self, request, obj=None):
+        for inline in self.get_inline_instances(request, obj):
+            if obj is None and isinstance(inline, SubjectsTabularInline):
+                continue  # Skip this inline when adding new object
+            yield inline.get_formset(request, obj), inline
+
+    def get_inline_instances(self, request, obj=None):
+        inline_instances = []
+        for inline_class in self.inlines:
+            inline = inline_class(self.model, self.admin_site)
+            if obj:
+                inline.has_change_permission = lambda request, obj=None: False  # Disable editing for existing objects
+            inline_instances.append(inline)
+        return inline_instances
 
     class Media:
         css = {
@@ -265,15 +286,6 @@ class DepartmentAdminView(admin.ModelAdmin):
         js = (
             'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js',)
 
-@admin.register(Subject)
-class SubjectAdminView(admin.ModelAdmin):
-    change_list_template = 'admin/class_information/subject/change_list.html'
-    list_display = ['name', 'code', 'department', 'year_level']
-    search_fields = ['name', 'year_level', 'code',]
-    list_filter = ('name', 'year_level',)
-    form = SubjectAdminForm
-    inlines = [ScheduleTabularInline,]
-    autocomplete_fields = ['department',]
 
 class RegistrationTabularInline(admin.TabularInline):
     verbose_name = "Student"
