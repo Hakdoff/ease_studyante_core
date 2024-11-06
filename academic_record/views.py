@@ -5,7 +5,7 @@ from rest_framework import generics, permissions,  status, viewsets, response, f
 from academic_record.custom_filter_assessment import CustomFilterAssessment, CustomFilterStudentAssessment
 from academic_record.gpa_caluclate import gpa_calculate
 from academic_record.uuid_checker import is_valid_uuid
-from aes.aes_implementation import decrypt
+# from aes.aes_implementation import decrypt
 from class_information.models import Subject
 from core.paginate import ExtraSmallResultsSetPagination
 from ease_studyante_core import settings
@@ -106,8 +106,8 @@ class AttendanceTeacherViewSet(viewsets.ViewSet):
             'tag': aes_256_split[3]
         }
 
-        decrypted = decrypt(temp_encrpyted, settings.AES_SECRET_KEY)
-        student = bytes.decode(decrypted)
+        # decrypted = decrypt(temp_encrpyted, settings.AES_SECRET_KEY)
+        # student = bytes.decode(decrypted)
 
         if is_valid_uuid(student):
             if current_academic_year:
